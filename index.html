@@ -21,18 +21,36 @@
     const organizations = [].map((elem) => `org:${elem}`)
 
     const repos = [
-      "openshift/machine-api-operator",
-      "openshift/cluster-api-provider-aws",
-      "openshift/cluster-api-provider-azure",
-      "openshift/cluster-api-provider-gcp",
-      "openshift/cluster-api-actuator-pkg",
-      "openshift/cluster-machine-approver",
-      "openshift/cluster-autoscaler-operator",
-      "openshift/kubernetes-autoscaler",
-      "openshift/cluster-cloud-controller-manager-operator",
+      "openshift/cloud-provider-alibaba-cloud",
       "openshift/cloud-provider-aws",
       "openshift/cloud-provider-azure",
-      "openshift/cloud-provider-vsphere"
+      "openshift/cloud-provider-gcp",
+      "openshift/cloud-provider-ibm",
+      "openshift/cloud-provider-vpc-controller",
+      "openshift/cloud-provider-vsphere",
+      "openshift/cluster-api-actuator-pkg",
+      "openshift/cluster-api-operator",
+      "openshift/cluster-api-provider-alibaba",
+      "openshift/cluster-api-provider-aws",
+      "openshift/cluster-api-provider-azure",
+      "openshift/cluster-api-provider-equinix-metal",
+      "openshift/cluster-api-provider-gcp",
+      "openshift/cluster-api-provider-ibmcloud",
+      "openshift/cluster-api-provider-kubevirt",
+      "openshift/cluster-api-provider-powervs",
+      "openshift/cluster-api-provider-vsphere",
+      "openshift/cluster-autoscaler-operator",
+      "openshift/cluster-capi-operator",
+      "openshift/cluster-cloud-controller-manager-operator",
+      "openshift/cluster-control-plane-machine-set-operator",
+      "openshift/cluster-machine-approver",
+      "openshift/infrastructure-provider-onboarding-guide",
+      "openshift/kubernetes-autoscaler",
+      "openshift/machine-api-operator",
+      "openshift/machine-api-provider-aws",
+      "openshift/machine-api-provider-azure",
+      "openshift/machine-api-provider-gcp",
+      "openshift/machine-api-provider-nutanix"
     ].map((elem) => `repo:${elem}`)
 
     const include = [
