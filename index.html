@@ -138,12 +138,20 @@ function render_item_extras(item) {
               + "</small>";
     for (let lbl of item.labels) {
         if (lbl.name != "ok-to-test") {
-            extras.innerHTML += ", <span class=\"small\" style=\"color:#"
-                      + lbl.color + "\">"
+            extras.innerHTML += ", <span class=\"small\" style=\"background-color:#"
+                      + lbl.color + ";color: " + text_color(lbl.color) + ";padding-left: 0.1em;border-radius: 5px;padding-right: 0.1em" + "\">"
                       + lbl.name + "</span>";
         }
     }
     return extras;
+}
+
+function text_color(background_color) {
+    // If the luminance is more than 0.5, the color is light and we should use dark text.
+    // Otherwise, the color is dark and we should use light text.
+    return (parseInt(background_color.substr(0, 2), 16) * 0.299 +
+            parseInt(background_color.substr(2, 2), 16) * 0.587 +
+            parseInt(background_color.substr(4, 2), 16) * 0.114) / 255 > 0.5 ? 'black' : 'white';
 }
 
 function render_item(item, id) {
