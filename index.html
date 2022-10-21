@@ -158,6 +158,7 @@ function render_item(item, id) {
     var li = document.createElement("li");
     li.classList.add('collapse');
     li.classList.add('colla');
+    li.classList.add('show');
     let user = item.user.login
 
     if (bots.includes(user)){
