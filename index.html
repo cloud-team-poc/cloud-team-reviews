@@ -55,6 +55,7 @@
 
     const include = [
       "is:open",
+      "is:pr",
       ...organizations,
       ...repos
     ]
@@ -69,6 +70,11 @@
       ...exclude
     ]
 
+    const bots = [
+        "cloud-team-rebase-bot[bot]",
+        "openshift-merge-robot",
+        "openshift-bot"
+    ];
 
     const query = query_elements.join("+")
 
@@ -76,24 +82,51 @@ let url = "https://api.github.com/search/issues?per_page=100&q=" + encodeURI(que
 
 function render_item_link(item) {
     var text = item.title;
-    let match = text.match(/^Bug #?([0-9]+): ?(.*)/);
-    if (match) {
-        console.log("Item " + item.html_url + " contains bugzilla ID " + match[1]);
-        text = match[2];
-    }
+    let bzmatch = text.match(/Bug #?([0-9]+): ?(.*)/);
+    let jiramatch = text.match(/OCPBUGS-#?([0-9]+): ?(.*)/);
 
     var title = document.createElement("p");
-    title.innerHTML = "<strong>" + item.user.login
-              + ":</strong> <a href=\"" + item.html_url + "\">#"
-              + item.number + "</a><a href=\"" + item.html_url
-              + "\" class=\"text-reset text-decoration-none\"> "
-              + text + "</a>";
-    if (match) {
-        title.innerHTML += " <a class=\"small text-muted\" href=\""
-              + "https://bugzilla.redhat.com/show_bug.cgi?id="
-              + match[1] + "\">[Bugzilla: " + match[1] + "]</a>";
+    title.innerHTML =
+        `<strong>
+            <a style='color: black;' href="${item.html_url}">
+                (${item.number}) ${text}
+            </a>
+        </strong>
+        -
+        <strong style='color:orange'>
+            ${item.user.login}
+        </strong>`;
+
+    if (bzmatch) {
+        title.innerHTML +=
+            `<strong>
+                <a class="small text-danger" href="https://bugzilla.redhat.com/show_bug.cgi?id=${bzmatch[1]}">
+                    [Bugzilla:${bzmatch[1]}]
+                </a>
+            </strong>`
+    } else if(jiramatch) {
+        title.innerHTML +=
+            `<strong>
+                <a class="small text-danger" href="https://issues.redhat.com/browse/OCPBUGS-${jiramatch[1]}">
+                    [JiraBug:${jiramatch[1]}]
+                </a>
+            </strong>`
     }
+
     return title;
+}
+
+function toggleBots() {
+  let botElems = document.getElementsByClassName("isbot");
+  if (document.getElementById("bots").checked) {
+    for (i = 0; i < botElems.length; i++) {
+      botElems[i].style.display = "none";
+    }
+  } else {
+    for (i = 0; i < botElems.length; i++) {
+      botElems[i].style.display = "";
+    }
+  }
 }
 
 function render_item_extras(item) {
@@ -113,22 +146,32 @@ function render_item_extras(item) {
     return extras;
 }
 
-function render_item(item) {
+function render_item(item, id) {
     var li = document.createElement("li");
+    li.classList.add('collapse');
+    li.classList.add('colla');
+    let user = item.user.login
+
+    if (bots.includes(user)){
+        li.classList.add('isbot');
+    }
+    li.setAttribute('id', id);
     li.appendChild(render_item_link(item));
     li.appendChild(render_item_extras(item));
     return li;
 }
 
-
 function render_repo(repo, items) {
-    let section = document.createElement("section");
+    let section = document.createElement("ul");
     let subh = document.createElement("header");
-    subh.innerHTML = "<a href=\"https://github.com/" + repo
-          + "\" class=\"text-decoration-none\">" + repo + "</a>";
+    let id = randID();
+    subh.innerHTML = `
+            <a data-bs-toggle='collapse' href='#${id}' role='button' aria-expanded='false' aria-controls='${id}'>
+                <h3><div style='text-size: 15px; display: inline;'> > (${items.length}) </div>${repo}</h3>
+            </a>`
     section.appendChild(subh);
     for (let item of items) {
-        section.appendChild(render_item(item));
+        section.appendChild(render_item(item,id));
     }
     return section;
 }
@@ -167,10 +210,28 @@ function render_response(items) {
     }
     console.log("Rendering " + count + " items");
     document.getElementById("title").innerHTML = count + " pull requests";
+    let tools = document.createElement("div");
+    tools.innerHTML = `<button
+                            data-bs-toggle="collapse"
+                            data-bs-target=".colla"
+                            aria-expanded="false"
+                            aria-controls="colla">
+                                Toggle Expand/Collapse
+                        </button>
+                        <div>
+                            <input type="checkbox" id="bots" name="bots" data-toggle="toggle" onclick="toggleBots()">
+                            <label for="bots">Hide Bots</label>
+                        </div>
+                        `;
+    target.appendChild(tools);
     let entries = Object.entries(repos).sort();
     for (let [repo, items] of entries) {
         target.appendChild(render_repo(repo, items));
     }
+}
+
+function randID(){
+    return new Date().getTime().toString(36).concat(performance.now().toString(), Math.random().toString()).replace(/\./g,"");
 }
 
 async function get_issues() {
@@ -199,7 +260,9 @@ async function get_issues() {
     render_response(items);
 }
 </script>
-<main class="d-flex justify-content-center">
+
+<h2>OCP cloud-infra review dashboard</h2>
+<main class="justify-content-center" style="margin: 0 10em 0 10em;">
   <div id="target" class="py-3">
       <h2 id="title">Loading...</h2>
   </div>
